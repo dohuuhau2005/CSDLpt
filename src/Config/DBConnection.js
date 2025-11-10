@@ -1,0 +1,125 @@
+const sql = require('mssql');
+
+const dbConfigManh1 = {
+    user: process.env.DB_User,
+    password: process.env.DB_Password,
+    server: process.env.DB_Server1,
+    port: 1434,
+    database: process.env.DB_Name,
+    options: {
+        encrypt: true, // bắt buộc nếu dùng Azure
+        trustServerCertificate: true, // cần thiết cho local SQL Server
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+
+};
+
+const dbConfigManh2 = {
+    user: process.env.DB_User,
+    password: process.env.DB_Password,
+    server: process.env.DB_Server2,
+    port: 1436,
+    database: process.env.DB_Name,
+    options: {
+        encrypt: true, // bắt buộc nếu dùng Azure
+        trustServerCertificate: true, // cần thiết cho local SQL Server
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+
+};
+const dbConfigManh3 = {
+    user: process.env.DB_User,
+    password: process.env.DB_Password,
+    server: process.env.DB_Server3,
+    port: 1435,
+    database: process.env.DB_Name,
+    options: {
+        encrypt: true, // bắt buộc nếu dùng Azure
+        trustServerCertificate: true, // cần thiết cho local SQL Server
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+
+};
+const dbConfigManh2Users = {
+    user: process.env.DB_User,
+    password: process.env.DB_Password,
+    server: process.env.DB_Server2,
+    port: 1434,
+    database: process.env.DB_UserManage,
+    options: {
+        encrypt: true, // bắt buộc nếu dùng Azure
+        trustServerCertificate: true, // cần thiết cho local SQL Server
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+
+};
+let primaryDBPool;
+let secondaryDBPool;
+let thirdDBPool;
+const GetManh1DBPool = async () => {
+    try {
+        primaryDBPool = new sql.ConnectionPool(dbConfigManh1);
+        await primaryDBPool.connect();
+        console.log("Kết nối đến cơ sở dữ liệu Mảnh 1!");
+        return primaryDBPool;
+    }
+    catch (err) {
+        console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 1 " + process.env.DB_User, err);
+        throw err;
+    }
+};
+
+const GetManh2DBPool = async () => {
+    try {
+        secondaryDBPool = new sql.ConnectionPool(dbConfigManh2);
+        await secondaryDBPool.connect();
+        console.log("Kết nối đến cơ sở dữ liệu Mảnh 2 !");
+        return secondaryDBPool;
+    }
+    catch (err) {
+        console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 2 " + process.env.DB_User, err);
+        throw err;
+    }
+};
+
+const GetManh3DBPool = async () => {
+    try {
+        thirdDBPool = new sql.ConnectionPool(dbConfigManh3);
+        await thirdDBPool.connect();
+        console.log("Kết nối đến cơ sở dữ liệu Mảnh 3 !");
+        return thirdDBPool;
+    }
+    catch (err) {
+        console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 3 " + process.env.DB_User, err);
+        throw err;
+    }
+};
+const GetManh2UserDBPool = async () => {
+    try {
+        secondaryDBPool = new sql.ConnectionPool(dbConfigManh2Users);
+        await secondaryDBPool.connect();
+        console.log("Kết nối đến cơ sở dữ liệu Mảnh ", process.env.DB_UserManage);
+        return secondaryDBPool;
+    }
+    catch (err) {
+        console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 3 " + process.env.DB_User, err);
+        throw err;
+    }
+};
+module.exports = { GetManh1DBPool, GetManh2DBPool, GetManh3DBPool, GetManh2UserDBPool };
