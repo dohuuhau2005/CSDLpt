@@ -48,6 +48,7 @@ app.use('/admin', staffsRoute);
 //staff routes
 app.use('/staff', require('./Staff/Customers'));
 app.use('/staff', require('./Staff/Contract'));
+app.use('/staff', require('./Staff/bills'));
 
 app.listen(process.env.port_serverNode, () => {
     console.log("Server is running on port " + process.env.port_serverNode);
