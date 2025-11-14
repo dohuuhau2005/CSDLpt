@@ -48,6 +48,7 @@ app.use('/admin', staffsRoute);
 //staff routes
 app.use('/staff', require('./Staff/Customers'));
 app.use('/staff', require('./Staff/Contract'));
+app.use('/staff', require('./Staff/bills'));
 
 //question
 app.use('/question', require('./Question/Question'));
