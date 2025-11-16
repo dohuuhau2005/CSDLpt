@@ -5,6 +5,9 @@
 package csdlpt;
 
 import java.awt.CardLayout;
+import java.util.prefs.Preferences;
+import org.json.JSONObject;
+import csdlpt.AuthService;
 
 /**
  *
@@ -16,6 +19,15 @@ public class EmployeeAppFrame extends javax.swing.JFrame {
      * Creates new form EmployeeAppFrame
      */
     public EmployeeAppFrame() {
+        Preferences prefs = Preferences.userRoot().node("UserInfo");
+        String token = prefs.get("token", null);
+
+        if (token != null) {
+            JSONObject staff = AuthService.getUserInfo(token);
+            if (staff != null) {
+                prefs.put("", token);
+            }
+        }
         initComponents();
     }
 
@@ -354,26 +366,26 @@ public class EmployeeAppFrame extends javax.swing.JFrame {
 
     private void btnQuanLyKhachHangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuanLyKhachHangActionPerformed
         // TODO add your handling code here:
-        CardLayout cl = (CardLayout)(contentPanelEmployee.getLayout());
-    cl.show(contentPanelEmployee, "QuanLyKhachHang"); 
+        CardLayout cl = (CardLayout) (contentPanelEmployee.getLayout());
+        cl.show(contentPanelEmployee, "QuanLyKhachHang");
     }//GEN-LAST:event_btnQuanLyKhachHangActionPerformed
 
     private void btnQuanLyHopDongActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuanLyHopDongActionPerformed
         // TODO add your handling code here:
-          CardLayout cl = (CardLayout)(contentPanelEmployee.getLayout());
-    cl.show(contentPanelEmployee, "QuanLyHopDong"); 
+        CardLayout cl = (CardLayout) (contentPanelEmployee.getLayout());
+        cl.show(contentPanelEmployee, "QuanLyHopDong");
     }//GEN-LAST:event_btnQuanLyHopDongActionPerformed
 
     private void btnLapHoaDonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLapHoaDonActionPerformed
         // TODO add your handling code here:
-          CardLayout cl = (CardLayout)(contentPanelEmployee.getLayout());
-    cl.show(contentPanelEmployee, "QuanLyHoaDon"); 
+        CardLayout cl = (CardLayout) (contentPanelEmployee.getLayout());
+        cl.show(contentPanelEmployee, "QuanLyHoaDon");
     }//GEN-LAST:event_btnLapHoaDonActionPerformed
 
     private void btnCau2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCau2ActionPerformed
         // TODO add your handling code here:
-          CardLayout cl = (CardLayout)(contentPanelEmployee.getLayout());
-    cl.show(contentPanelEmployee, "Cau2"); 
+        CardLayout cl = (CardLayout) (contentPanelEmployee.getLayout());
+        cl.show(contentPanelEmployee, "Cau2");
     }//GEN-LAST:event_btnCau2ActionPerformed
 
     /**
@@ -383,7 +395,7 @@ public class EmployeeAppFrame extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {

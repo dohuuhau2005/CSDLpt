@@ -33,13 +33,36 @@ router.get('/customers', verifyToken, async (req, res) => {
 router.post('/customers', verifyToken, async (req, res) => {
     try {
         //đã có ở chi nhánh khác chưa
-        const { maKH, tenKH, maCN } = req.body;
+        const { maKH, tenKH, maCN, thanhpho } = req.body;
         // Nếu có thì check tổng xem có hợp đồng chưa thanh toán bên khác hay không và hợp đồng bao nhiêu
+        const queryIsPaid = `use DienLuc
+select * from hopdong where hopdong.isPaid=0 and maKH=@maKH`;
+
         const pool1 = await db.GetManh1DBPool();
         const pool2 = await db.GetManh2DBPool();
         const pool3 = await db.GetManh3DBPool();
 
-        await pool1.request().input("")
+
+        const result1 = await pool1.request().input("maKH", sql.VarChar, maKH).query(queryIsPaid);
+        const result2 = await pool2.request().input("maKH", sql.VarChar, maKH).query(queryIsPaid);
+        const result3 = await pool3.request().input("maKH", sql.VarChar, maKH).query(queryIsPaid);
+        if (result1.recordset.length !== 0 || result2.recordset.length !== 0 || result3.recordset.length !== 0) {
+            const sum = [...result1.recordset, ...result2.recordset, ...result3.recordset];
+            return res.status(200).json({ isAdded: false, success: true, message: "Đã có hợp đồng tại chi nhánh khác chưa thanh toán" });
+
+        }
+
+        const queryAdd = "insert khachhang (maKH,tenKH,maCN) values (@maKH, @tenKH,@maCN)";
+        if (thanhpho === "TP1") {
+            await pool1.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+        }
+        if (thanhpho === "TP2") {
+            await pool2.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+        }
+        if (thanhpho === "TP3") {
+            await pool3.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+        }
+
         //nếu không có hợp đồng hoặc toàn bộ được đã chi trả thì thêm khách hàng vào chi nhánh hiện tại
         return res.status(200).json({ isAdded: true, success: true, message: "Thêm khách hàng thành công" });
     } catch (error) {
@@ -71,10 +94,39 @@ router.put('/customers/:id', verifyToken, async (req, res) => {
         await request1.query(query);
         await request2.query(query);
         await request3.query(query);
-        return res.status(200).json({ isAdded: true, success: true, message: "chỉnh sửa khách hàng thành công" });
+        return res.status(200).json({ success: true, message: "chỉnh sửa khách hàng thành công" });
     } catch (error) {
         console.error("Lỗi khi thêm khách hàng:", error);
-        return res.status(500).json({ isAdded: false, success: false, message: "Lỗi máy chủ khi chỉnh sửa khách hàng" });
+        return res.status(500).json({ success: false, message: "Lỗi máy chủ khi chỉnh sửa khách hàng" });
+    }
+
+}); router.delete('/customers/:id', verifyToken, async (req, res) => {
+    try {
+        const customerId = req.params.id;
+        const { maNV } = req.body;
+        const pool1 = await db.GetManh1DBPool();
+        const pool2 = await db.GetManh2DBPool();
+        const pool3 = await db.GetManh3DBPool();
+        const request1 = pool1.request();
+        const request2 = pool2.request();
+        const request3 = pool3.request();
+        request1.input('maKH', sql.VarChar, customerId);
+
+        request1.input('maNV', sql.VarChar, maNV);
+        request2.input('maKH', sql.VarChar, customerId);
+
+        request2.input('maNV', sql.VarChar, maNV);
+        request3.input('maKH', sql.VarChar, customerId);
+
+        request3.input('maNV', sql.VarChar, maNV);
+        const query = 'use DienLuc Delete khachhang  WHERE maKH=@maKH and maCN=(SELECT maCN FROM nhanvien WHERE maNV=@maNV)';
+        await request1.query(query);
+        await request2.query(query);
+        await request3.query(query);
+        return res.status(200).json({ isDeleted: true, success: true, message: "Xóa khách hàng thành công" });
+    } catch (error) {
+        console.error("Lỗi khi thêm khách hàng:", error);
+        return res.status(500).json({ isDeleted: false, success: false, message: "Lỗi máy chủ khi Xóa khách hàng" });
     }
 
 });

@@ -5,7 +5,7 @@ const db = require('../src/Config/DBConnection');
 const { ulid } = require('ulid')
 const verifyToken = require('../src/Middleware/verifyToken');
 router.get("/contracts", verifyToken, async (req, res) => {
-    const { manv } = req.query;
+    const manv = req.query.maNV;
     try {
         const query = `
     use DienLuc
