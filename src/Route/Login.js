@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const db = require('../Config/DBConnection');
-const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const verifyToken = require('../Middleware/verifyToken');
@@ -13,68 +12,68 @@ router.post('/', async (req, res) => {
         const pool = await db.GetManh2UserDBPool();
         const request = pool.request();
         request.input('Email', sql.VarChar, email);
+        
+        // Query lấy thông tin user
         const query = 'use UsersCsdlPt SELECT * FROM Users WHERE Email = @Email';
-
         const result = await request.query(query);
 
         if (result.recordset.length > 0) {
             const user = result.recordset[0];
 
+            // Lấy thông tin từ DB
             const MaNV = user.MaNV;
             const salt = user.Salt;
             const emailpassDB = String(user.Password).trim();
-            const role = user.Role;
+            const role = user.Role; // Lấy quyền (Admin/Staff)
+            
+            // Xử lý hash password để so sánh
             const passWithSalt = password + salt;
-
             const hashedPassword = crypto.createHash('sha512').update(passWithSalt).digest('hex');
-            console.log("passs" + password);
-            console.log("dsadasdsadadada " + salt);
 
+            // Log để debug (bạn có thể xóa bớt khi đã chạy ổn)
+            console.log("Input Password:", password);
+            console.log("Salt from DB:", salt);
+            console.log("Hashed Input:", hashedPassword);
+            console.log("DB Password:", emailpassDB);
 
-
-            console.log("hasssss" + hashedPassword);
-            // const isMatch = await bcrypt.compare(passWithSalt, emailpassDB);
-
-
-            console.log("hashedPassword:", hashedPassword, "length:", hashedPassword.length);
-            console.log("fromDB:", emailpassDB, "length:", emailpassDB.length);
-
-            for (let i = 0; i < hashedPassword.length; i++) {
-                if (hashedPassword[i] !== emailpassDB[i]) {
-                    console.log(`Mismatch at position ${i}: ${hashedPassword[i]} != ${emailpassDB[i]}`);
-                    break;
-                }
-            }
+            // So sánh mật khẩu
             if (hashedPassword === emailpassDB) {
-                console.log("khop nhaaaaaaaaaaaaaaaaaaaaa");
-            }
+                console.log("Mật khẩu trùng khớp!");
 
-            if (hashedPassword === emailpassDB) {
+                // Tạo token
+                const token = jwt.sign(
+                    { id: MaNV, email: email, role: role }, 
+                    process.env.JWT_SECRET, 
+                    { expiresIn: '1h' }
+                );
 
-                const token = jwt.sign({ id: MaNV, email: email, role: role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                console.log("Role gửi đi:", role);
 
-                console.log("token", token);
-                console.log("role", role);
-                console.log("email", email);
-                console.log("userId", MaNV);
-                return res.status(200).json({ token: token, isLocked: false, success: true, message: "Đăng nhập thành công" });
-
+                // --- TRẢ VỀ KẾT QUẢ KÈM ROLE CHO JAVA ---
+                return res.status(200).json({ 
+                    token: token, 
+                    role: role,      // <--- ĐÃ THÊM: Gửi role về để Java phân quyền
+                    isLocked: false, 
+                    success: true, 
+                    message: "Đăng nhập thành công" 
+                });
 
             } else {
                 return res.status(401).json({ success: false, message: "Sai mật khẩu" });
             }
 
-
         } else {
-            res.json({ exists: false });
+            // Không tìm thấy email
+            res.json({ exists: false, message: "Tài khoản không tồn tại" });
         }
     } catch (err) {
         console.error('Lỗi kiểm tra email:', err);
         res.status(500).json({ error: 'Lỗi server' });
     }
-
 });
+
 router.get('/protected', verifyToken, (req, res) => {
     res.json({ message: 'This is a protected route', userId: req.userId });
 });
+
 module.exports = router;
