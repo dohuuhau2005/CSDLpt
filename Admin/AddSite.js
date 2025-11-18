@@ -6,18 +6,22 @@ const db = require('../src/Config/DBConnection');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const verifyToken = require('../src/Middleware/verifyToken');
+const { tp1, tp2, tp3 } = require('../src/Config/logger');
 router.post('/', verifyToken, async (req, res) => {
     const { maCN, tenCN, thanhpho } = req.body;
     try {
         let pool;
         if (thanhpho == 'TP1') {
             pool = await db.GetManh1DBPool();
+            tp1.insert("thêm chi nhánh " + tenCN, { maCN: maCN, tenCN: tenCN, thanhpho: thanhpho })
         }
         else if (thanhpho == 'TP2') {
             pool = await db.GetManh2DBPool();
+            tp2.insert("thêm chi nhánh " + tenCN, { maCN: maCN, tenCN: tenCN, thanhpho: thanhpho })
         }
         else {
             pool = await db.GetManh3DBPool();
+            tp3.insert("thêm chi nhánh " + tenCN, { maCN: maCN, tenCN: tenCN, thanhpho: thanhpho })
         }
 
         const request = pool.request();

@@ -25,7 +25,7 @@ public class EmployeeAppFrame extends javax.swing.JFrame {
         if (token != null) {
             JSONObject staff = AuthService.getUserInfo(token);
             if (staff != null) {
-                prefs.put("", token);
+                prefs.put("thanhpho", token);
             }
         }
         initComponents();

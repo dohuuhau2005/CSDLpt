@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const db = require('../src/Config/DBConnection');
-
+const { tp1, tp2, tp3 } = require('../src/Config/logger');
 const verifyToken = require('../src/Middleware/verifyToken');
 router.get('/sites', verifyToken, async (req, res) => {
     try {
@@ -48,9 +48,9 @@ router.delete('/sites/:id', verifyToken, async (req, res) => {
         }
         const query = 'use DienLuc delete chinhanh where maCN = @MaCN';
 
-        const result1 = await request1.query(query);
-        const result2 = await request2.query(query);
-        const result3 = await request3.query(query);
+        const result1 = await pool1.request().input('MaCN', sql.VarChar, req.params.id).query(query);
+        const result2 = await pool2.request().input('MaCN', sql.VarChar, req.params.id).query(query);
+        const result3 = await pool3.request().input('MaCN', sql.VarChar, req.params.id).query(query);
 
         return res.status(200).json({ isDeleted: true, success: true, message: "Xóa chi nhánh thành công" });
     } catch (error) {
