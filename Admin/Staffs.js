@@ -6,7 +6,7 @@ const db = require('../src/Config/DBConnection');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const verifyToken = require('../src/Middleware/verifyToken');
-
+const { tp1, tp2, tp3 } = require('../src/Config/logger');
 
 router.get('/staffs', verifyToken, async (req, res) => {
     try {
@@ -31,65 +31,87 @@ router.get('/staffs', verifyToken, async (req, res) => {
     }
 });
 router.post('/staffs', verifyToken, async (req, res) => {
-    try {//trên fe có nút check thành phố khi chọn chi nhánh
+    try {
         const { maNV, Email, Password, hoten, maCN, thanhpho } = req.body;
         const Role = 'staff';
+
+        // Lấy Pool kết nối
         const pool1 = await db.GetManh1DBPool();
         const pool2 = await db.GetManh2DBPool();
         const pool3 = await db.GetManh3DBPool();
         const userPool = await db.GetManh2UserDBPool();
 
-        const request1 = pool1.request();
-        const request2 = pool2.request();
-        const request3 = pool3.request();
-        const userRequest = userPool.request();
+        // --- PHẦN 1: KIỂM TRA TỒN TẠI (Tạo request riêng để check) ---
+        // Chỉ input maNV vào đây để check
+        const checkQuery = 'use DienLuc SELECT * FROM nhanvien WHERE maNV = @maNV';
 
-        request1.input('maNV', sql.VarChar, maNV);
-        request2.input('maNV', sql.VarChar, maNV);
-        request3.input('maNV', sql.VarChar, maNV);
-        const checkQuery = 'use DienLuc SELECT * FROM nhanvien WHERE maNV = @maNV ';
-        const checkResult1 = await request1.query(checkQuery);
-        const checkResult2 = await request2.query(checkQuery);
-        const checkResult3 = await request3.query(checkQuery);
+        // Dùng Promise.all để chạy 3 câu check cùng lúc cho nhanh (hoặc để await từng cái như cũ cũng được)
+        const checkResult1 = await pool1.request().input('maNV', sql.VarChar, maNV).query(checkQuery);
+        const checkResult2 = await pool2.request().input('maNV', sql.VarChar, maNV).query(checkQuery);
+        const checkResult3 = await pool3.request().input('maNV', sql.VarChar, maNV).query(checkQuery);
+
         if (checkResult1.recordset.length > 0 || checkResult2.recordset.length > 0 || checkResult3.recordset.length > 0) {
             return res.status(400).json({ isAdded: false, success: false, message: "Mã nhân viên hoặc Email đã tồn tại" });
         }
 
-
+        // --- PHẦN 2: XỬ LÝ PASSWORD & USER ---
         const salt = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
         const passWithSalt = Password + salt;
-
-        // 1. Hash mật khẩu
-        // const hashedPassword = await bcrypt.hash(passWithSalt, 10);
         const hashedPassword = crypto.createHash('sha512').update(passWithSalt).digest('hex');
-        userRequest.input('Role', sql.NVarChar, Role);
-        userRequest.input('Password', sql.VarChar, hashedPassword);
-        userRequest.input('Salt', sql.VarChar, salt);
-        userRequest.input('maNV', sql.VarChar, maNV);
-        userRequest.input('Email', sql.VarChar, Email);
 
-        request1.input('hoten', sql.NVarChar, hoten);
-        request1.input('maCN', sql.VarChar, maCN);
-        request2.input('hoten', sql.NVarChar, hoten);
-        request2.input('maCN', sql.VarChar, maCN);
-        request3.input('hoten', sql.NVarChar, hoten);
-        request3.input('maCN', sql.VarChar, maCN);
+        // --- PHẦN 3: INSERT NHÂN VIÊN  ---
+        // Không khai báo input tràn lan bên ngoài nữa. Vào đúng IF mới tạo Request.
+        const queryInsertNV = 'use DienLuc INSERT INTO nhanvien (maNV, hoten, maCN) VALUES (@maNV, @hoten, @maCN)';
 
-        const query = 'use DienLuc INSERT INTO nhanvien (maNV, hoten, maCN) VALUES (@maNV, @hoten, @maCN)';
-        const queryUsers = 'use UsersCsdlPt INSERT INTO Users (MaNV, Email, Password, Role,Salt) VALUES (@maNV, @Email, @Password, @Role,@Salt)';
+        // Chỉ thực hiện insert vào đúng thành phố được chọn
         if (thanhpho === "TP1") {
-            await request1.query(query);
-        }
-        if (thanhpho === "TP2") {
-            await request2.query(query);
-        }
-        if (thanhpho === "TP3") {
-            await request3.query(query);
+            // Tạo request MỚI hoàn toàn từ pool1, đảm bảo sạch sẽ
+            const result1 = await pool1.request()
+                .input('maNV', sql.VarChar, maNV)
+                .input('hoten', sql.NVarChar, hoten)
+                .input('maCN', sql.VarChar, maCN)
+                .query(queryInsertNV);
+
+            if (result1.rowsAffected[0] > 0) {
+                tp1.insert("Đã thêm nhân viên " + maNV, { maNV, hoten, maCN });
+            }
+        } else if (thanhpho === "TP2") {
+            // Tạo request MỚI từ pool2
+            const result2 = await pool2.request()
+                .input('maNV', sql.VarChar, maNV)
+                .input('hoten', sql.NVarChar, hoten)
+                .input('maCN', sql.VarChar, maCN)
+                .query(queryInsertNV);
+
+            if (result2.rowsAffected[0] > 0) {
+                tp2.insert("Đã thêm nhân viên " + maNV, { maNV, hoten, maCN });
+            }
+        } else if (thanhpho === "TP3") {
+            // Tạo request MỚI từ pool3
+            const result3 = await pool3.request()
+                .input('maNV', sql.VarChar, maNV)
+                .input('hoten', sql.NVarChar, hoten)
+                .input('maCN', sql.VarChar, maCN)
+                .query(queryInsertNV);
+
+            if (result3.rowsAffected[0] > 0) {
+                tp3.insert("Đã thêm nhân viên " + maNV, { maNV, hoten, maCN });
+            }
         }
 
-        await userRequest.query(queryUsers);
+        // --- PHẦN 4: INSERT USER SYSTEM ---
+        const queryUsers = 'use UsersCsdlPt INSERT INTO Users (MaNV, Email, Password, Role, Salt) VALUES (@maNV, @Email, @Password, @Role, @Salt)';
+
+        await userPool.request()
+            .input('maNV', sql.VarChar, maNV)
+            .input('Email', sql.VarChar, Email)
+            .input('Password', sql.VarChar, hashedPassword)
+            .input('Role', sql.NVarChar, Role)
+            .input('Salt', sql.VarChar, salt)
+            .query(queryUsers);
 
         return res.status(200).json({ success: true, message: "Thêm nhân viên thành công" });
+
     } catch (error) {
         console.error("Lỗi khi thêm nhân viên:", error);
         return res.status(500).json({ isAdded: true, success: false, message: "Lỗi máy chủ khi thêm nhân viên" });
@@ -180,13 +202,19 @@ where nhanvien.maNV = @MaNV
             const queryInsertHistory = 'use UsersCsdlPt INSERT INTO lichSuChuyenCongTac (MaNV, maCNCu,maCNMoi) VALUES (@MaNV, @oldMaCN, @newMaCN)';
             DeleteOld = async () => {
                 if (oldThanhpho == "TP1") {
-                    await pool1.request().input('MaNV', sql.VarChar, req.params.id).query(queryDelete);
+                    const result1 = await pool1.request().input('MaNV', sql.VarChar, req.params.id).query(queryDelete);
+                    if (result1.rowsAffected[0] > 0)
+                        tp1.delete("đã xóa nhân viên " + req.params.id, { maNV: req.params.id })
                 }
                 if (oldThanhpho == "TP2") {
-                    await pool2.request().input('MaNV', sql.VarChar, req.params.id).query(queryDelete);
+                    const result2 = await pool2.request().input('MaNV', sql.VarChar, req.params.id).query(queryDelete);
+                    if (result2.rowsAffected[0] > 0)
+                        tp2.delete("đã xóa nhân viên " + req.params.id, { maNV: req.params.id })
                 }
                 if (oldThanhpho == "TP3") {
-                    await pool3.request().input('MaNV', sql.VarChar, req.params.id).query(queryDelete);
+                    const result3 = await pool3.request().input('MaNV', sql.VarChar, req.params.id).query(queryDelete);
+                    if (result3.rowsAffected[0] > 0)
+                        tp3.delete("đã xóa nhân viên " + req.params.id, { maNV: req.params.id })
                 }
             }
             await DeleteOld();
@@ -194,19 +222,23 @@ where nhanvien.maNV = @MaNV
             if (thanhpho == "TP1") {
 
 
-                await pool1.request().input('MaNV', sql.VarChar, req.params.id).input('maCN', sql.VarChar, maCN).input('hoten', sql.NVarChar, hoten).query(queryInsert);
+                const resultInsert1 = await pool1.request().input('MaNV', sql.VarChar, req.params.id).input('maCN', sql.VarChar, maCN).input('hoten', sql.NVarChar, hoten).query(queryInsert);
+                if (resultInsert1.rowsAffected[0] > 0)
+                    tp1.insert("Đã thêm nhân viên " + req.params.id, { manv: req.params.id, maCN: maCN, hoten: hoten, });
             }
             if (thanhpho == "TP2") {
 
 
-                await pool2.request().input('hoten', sql.NVarChar, hoten).input('maCN', sql.VarChar, maCN).input('MaNV', sql.VarChar, req.params.id).query(queryInsert);
-
+                const resultInsert2 = await pool2.request().input('hoten', sql.NVarChar, hoten).input('maCN', sql.VarChar, maCN).input('MaNV', sql.VarChar, req.params.id).query(queryInsert);
+                if (resultInsert2.rowsAffected[0] > 0)
+                    tp2.insert("Đã thêm nhân viên " + req.params.id, { manv: req.params.id, maCN: maCN, hoten: hoten, });
             }
             if (thanhpho == "TP3") {
 
 
-                await pool3.request().input('hoten', sql.NVarChar, hoten).input('maCN', sql.VarChar, maCN).input('MaNV', sql.VarChar, req.params.id).query(queryInsert);
-
+                const resultInsert3 = await pool3.request().input('hoten', sql.NVarChar, hoten).input('maCN', sql.VarChar, maCN).input('MaNV', sql.VarChar, req.params.id).query(queryInsert);
+                if (resultInsert3.rowsAffected[0] > 0)
+                    tp3.insert("Đã thêm nhân viên " + req.params.id, { manv: req.params.id, maCN: maCN, hoten: hoten, });
             }
             await pooluser.request().input('newMaCN', sql.VarChar, maCN)
                 .input('oldMaCN', sql.VarChar, oldMaCN)

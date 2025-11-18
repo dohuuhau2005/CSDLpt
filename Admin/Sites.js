@@ -52,6 +52,12 @@ router.delete('/sites/:id', verifyToken, async (req, res) => {
         const result2 = await pool2.request().input('MaCN', sql.VarChar, req.params.id).query(query);
         const result3 = await pool3.request().input('MaCN', sql.VarChar, req.params.id).query(query);
 
+        if (result1.rowsAffected[0] > 0)
+            tp1.delete("Đã xóa chi nhánh " + req.params.id, { maCN: req.params.id })
+        if (result2.rowsAffected[0] > 0)
+            tp2.delete("Đã xóa chi nhánh " + req.params.id, { maCN: req.params.id })
+        if (result3.rowsAffected[0] > 0)
+            tp3.delete("Đã xóa chi nhánh " + req.params.id, { maCN: req.params.id })
         return res.status(200).json({ isDeleted: true, success: true, message: "Xóa chi nhánh thành công" });
     } catch (error) {
         console.error("Lỗi khi xuất danh sách chi nhánh:", error);
@@ -71,6 +77,8 @@ router.put('/sites/:id', verifyToken, async (req, res) => {
             const query = 'use DienLuc update chinhanh set tenCN = @tenCN where maCN = @MaCN';
 
             const result1 = await request1.query(query);
+            if (request1.rowsAffected[0] > 0)
+                tp1.update("Đã chỉnh sửa tên của chi nhánh " + req.params.id, { maCN: req.params.id, newName: tenCN });
             return res.status(200).json({ success: true, message: "Cập nhật chi nhánh thành công" });
         }
         if (thanhpho == 'TP2') {
@@ -80,6 +88,8 @@ router.put('/sites/:id', verifyToken, async (req, res) => {
             request2.input('tenCN', sql.VarChar, siteName);
             const query2 = 'use DienLuc update chinhanh set tenCN = @tenCN where maCN = @MaCN';
             const result2 = await request2.query(query2);
+            if (request2.rowsAffected[0] > 0)
+                tp2.update("Đã chỉnh sửa tên của chi nhánh" + req.params.id, { maCN: req.params.id, newName: tenCN });
             return res.status(200).json({ success: true, message: "Cập nhật chi nhánh thành công" });
 
         }
@@ -90,6 +100,8 @@ router.put('/sites/:id', verifyToken, async (req, res) => {
             request3.input('tenCN', sql.VarChar, siteName);
             const query3 = 'use DienLuc update chinhanh set tenCN = @tenCN where maCN = @MaCN';
             const result3 = await request3.query(query3);
+            if (request3.rowsAffected[0] > 0)
+                tp3.update("Đã chỉnh sửa tên của chi nhánh" + req.params.id, { maCN: req.params.id, newName: tenCN });
             return res.status(200).json({ success: true, message: "Cập nhật chi nhánh thành công" });
         }
 
