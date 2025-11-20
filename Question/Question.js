@@ -13,6 +13,7 @@ router.get('/cau1', verifyToken, async (req, res) => {
         const hoadon1 = await pool1.request().input("maNV", sql.VarChar, maNV).input("maKH", sql.VarChar, maKH).query(query);
         const hoadon2 = await pool2.request().input("maNV", sql.VarChar, maNV).input("maKH", sql.VarChar, maKH).query(query);
         const hoadon3 = await pool3.request().input("maNV", sql.VarChar, maNV).input("maKH", sql.VarChar, maKH).query(query);
+
         const tong = [...hoadon1.recordset, ...hoadon2.recordset, ...hoadon3.recordset];
         return res.status(200).json({ success: true, hoatong: tong, message: "lấy dữ liệu hóa đơn thành công" })
     } catch (error) {
