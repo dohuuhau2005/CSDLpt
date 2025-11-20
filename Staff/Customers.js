@@ -3,6 +3,7 @@ const router = express.Router();
 const sql = require('mssql');
 const db = require('../src/Config/DBConnection');
 const verifyToken = require('../src/Middleware/verifyToken');
+const { tp1, tp2, tp3 } = require('../src/Config/logger');
 router.get('/customers', verifyToken, async (req, res) => {
     try {
         const maNV = req.query.maNV;
@@ -54,13 +55,20 @@ select * from hopdong where hopdong.isPaid=0 and maKH=@maKH`;
 
         const queryAdd = "insert khachhang (maKH,tenKH,maCN) values (@maKH, @tenKH,@maCN)";
         if (thanhpho === "TP1") {
-            await pool1.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+            const resultKh1 = await pool1.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+            if (resultKh1.rowsAffected[0] > 0)
+                tp1.insert("Thêm khách hàng " + maKH, { maKH: maKH, tenKH: tenKH, maCN: maCN });
         }
         if (thanhpho === "TP2") {
-            await pool2.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+            const resultKh2 = await pool2.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+            if (resultKh2.rowsAffected[0] > 0)
+                tp2.insert("Thêm khách hàng " + maKH, { maKH: maKH, tenKH: tenKH, maCN: maCN });
+
         }
         if (thanhpho === "TP3") {
-            await pool3.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+            const resultKh3 = await pool3.request().input("maKH", sql.VarChar, maKH).input("tenKH", sql.NVarChar, tenKH).input("maCN", sql.VarChar, maCN).query(queryAdd);
+            if (resultKh3.rowsAffected[0] > 0)
+                tp3.insert("Thêm khách hàng " + maKH, { maKH: maKH, tenKH: tenKH, maCN: maCN });
         }
 
         //nếu không có hợp đồng hoặc toàn bộ được đã chi trả thì thêm khách hàng vào chi nhánh hiện tại
