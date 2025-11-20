@@ -4,6 +4,7 @@ const sql = require('mssql');
 const { ulid } = require('ulid');
 const db = require('../src/Config/DBConnection');
 const verifyToken = require('../src/Middleware/verifyToken');
+const { tp1, tp2, tp3 } = require('../src/Config/logger');
 router.post("/bills", verifyToken, async (req, res) => {
     const { thanhpho, soHD, maNV, soTien } = req.body;
     try {
@@ -21,42 +22,56 @@ insert into hoadon (soHDN ,
         const pool1 = await db.GetManh1DBPool();
         const pool2 = await db.GetManh2DBPool();
         const pool3 = await db.GetManh3DBPool();
+        const soHDN = ulid();
         if (thanhpho === "TP1") {
-            await pool1.request()
+            const resultUpdate1 = await pool1.request()
                 .input("soHD", sql.VarChar, soHD).query(queryUpdate)
+            if (resultUpdate1.rowsAffected[0] > 0)
+                tp1.update("thêm hóa đơn cho hợp đồng " + soHD, { soHD: soHD })
             const result1 = await pool1.request()
                 .input("soHD", sql.VarChar, soHD)
-                .input("soHDN", sql.VarChar, ulid())
+                .input("soHDN", sql.VarChar, soHDN)
                 .input("maNV", sql.VarChar, maNV)
                 .input("thang", sql.Int, month)
                 .input("nam", sql.Int, year)
                 .input("soTien", sql.Int, soTien)
                 .query(query);
+            if (result1.rowsAffected[0] > 0)
+                tp1.insert("thêm hóa đơn " + soHDN, { soHD: soHD, soHDN: soHDN, maNV: maNV, thang: month, nam: year, soTien: soTien });
         }
 
         if (thanhpho === "TP2") {
-            await pool2.request()
+            const resultUpdate2 = await pool2.request()
                 .input("soHD", sql.VarChar, soHD).query(queryUpdate)
+            if (resultUpdate2.rowsAffected[0] > 0)
+                tp2.update("thêm hóa đơn cho hợp đồng " + soHD, { soHD: soHD })
             const result2 = await pool2.request()
                 .input("soHD", sql.VarChar, soHD)
-                .input("soHDN", sql.VarChar, ulid())
+                .input("soHDN", sql.VarChar, soHDN)
                 .input("maNV", sql.VarChar, maNV)
                 .input("thang", sql.Int, month)
                 .input("nam", sql.Int, year)
                 .input("soTien", sql.Int, soTien)
                 .query(query);
+            if (result2.rowsAffected[0] > 0)
+                tp2.insert("thêm hóa đơn " + soHDN, { soHD: soHD, soHDN: soHDN, maNV: maNV, thang: month, nam: year, soTien: soTien });
+
         }
         if (thanhpho === "TP3") {
-            await pool3.request()
+            const resultUpdate3 = await pool3.request()
                 .input("soHD", sql.VarChar, soHD).query(queryUpdate)
+            if (resultUpdate3.rowsAffected[0] > 0)
+                tp3.update("thêm hóa đơn cho hợp đồng " + soHD, { soHD: soHD })
             const result3 = await pool3.request()
                 .input("soHD", sql.VarChar, soHD)
-                .input("soHDN", sql.VarChar, ulid())
+                .input("soHDN", sql.VarChar, soHDN)
                 .input("maNV", sql.VarChar, maNV)
                 .input("thang", sql.Int, month)
                 .input("nam", sql.Int, year)
                 .input("soTien", sql.Int, soTien)
                 .query(query);
+            if (result3.rowsAffected[0] > 0)
+                tp3.insert("thêm hóa đơn " + soHDN, { soHD: soHD, soHDN: soHDN, maNV: maNV, thang: month, nam: year, soTien: soTien });
         }
         return res.status(200).json({ success: true, message: "them hoa don thanh cong" })
     } catch (error) {
