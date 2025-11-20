@@ -51,12 +51,14 @@ router.post('/', async (req, res) => {
 
                 // --- TRẢ VỀ KẾT QUẢ KÈM ROLE CHO JAVA ---
                 return res.status(200).json({ 
-                    token: token, 
-                    role: role,      // <--- ĐÃ THÊM: Gửi role về để Java phân quyền
-                    isLocked: false, 
-                    success: true, 
-                    message: "Đăng nhập thành công" 
-                });
+                    token: token, 
+                    role: role,
+                    isLocked: false, 
+                    success: true, 
+                    message: "Đăng nhập thành công",
+                    id: MaNV, 
+                    MaNV: MaNV
+                });
 
             } else {
                 return res.status(401).json({ success: false, message: "Sai mật khẩu" });

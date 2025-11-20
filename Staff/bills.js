@@ -65,4 +65,49 @@ insert into hoadon (soHDN ,
     }
 
 });
+
+router.get("/bills", verifyToken, async (req, res) => {
+    // Lấy maNV từ query params được gửi từ client Java
+    const maNV = req.query.maNV; 
+
+    if (!maNV) {
+        return res.status(400).json({ success: false, message: "Thiếu Mã Nhân Viên để truy vấn hóa đơn." });
+    }
+    
+    // Query: Lấy tất cả các cột cần thiết cho bảng Hóa Đơn, lọc theo MaNV
+    const query = `
+        USE DienLuc;
+        SELECT soHDN, thang, nam, soHD, maNV, soTien
+        FROM hoadon
+        WHERE maNV = @maNV;
+    `;
+    
+    try {
+        const pool1 = await db.GetManh1DBPool();
+        const pool2 = await db.GetManh2DBPool();
+        const pool3 = await db.GetManh3DBPool();
+        
+        // Thực hiện truy vấn trên 3 mảnh dữ liệu
+        const result1 = await pool1.request().input("maNV", sql.VarChar, maNV).query(query);
+        const result2 = await pool2.request().input("maNV", sql.VarChar, maNV).query(query);
+        const result3 = await pool3.request().input("maNV", sql.VarChar, maNV).query(query);
+        
+        // Kết hợp kết quả từ 3 mảnh
+        const allBills = [...result1.recordset, ...result2.recordset, ...result3.recordset];
+        
+        // Trả về dữ liệu dưới key "bills" (key này sẽ được code Java Client trích xuất)
+        return res.status(200).json({ 
+            success: true, 
+            bills: allBills, 
+            message: "Lấy danh sách hóa đơn thành công" 
+        });
+        
+    } catch (error) {
+        console.error("Lỗi lấy danh sách hóa đơn:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Lỗi máy chủ khi lấy danh sách hóa đơn: " + error.message 
+        });
+    }
+});
 module.exports = router;
