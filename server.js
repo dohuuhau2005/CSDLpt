@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
-// const bodyParser = require('body-parser'); // Đã bỏ, dùng express.json() thay thế
 const { GetManh1DBPool, GetManh2DBPool, GetManh3DBPool, GetManh2UserDBPool } = require('./src/Config/DBConnection');
 
 const app = express();
@@ -34,6 +33,7 @@ app.use((req, res, next) => {
 // 2. KẾT NỐI DATABASE
 // ==================================================================
 
+// Khởi chạy kết nối DB song song (nên dùng Promise.all cho clean hơn)
 GetManh1DBPool()
     .then(() => console.log("✅ Mảnh 1: OK"))
     .catch((err) => console.error("❌ Lỗi Mảnh 1:", err));
@@ -59,44 +59,42 @@ app.get("/", (req, res) => {
 // 3. KHAI BÁO ROUTES
 // ==================================================================
 
-// Import các file route
+// Import và sử dụng các file route
 const loginRoute = require('./src/Route/Login');
-const addSiteRoute = require('./Admin/AddSite');
-const countRoute = require('./Admin/Count');
-const sitesRoute = require('./Admin/Sites');
-const staffsRoute = require('./Admin/Staffs');
-
-// Sử dụng route
-// Khi gọi vào http://localhost:9999/login, nó sẽ chạy vào loginRoute
 app.use('/login', loginRoute); 
 
-// Các route Admin
-app.use('/admin', countRoute);
-app.use('/admin/addsite', addSiteRoute);
-app.use('/admin', sitesRoute);
-app.use('/admin', staffsRoute);
-
-<<<<<<< HEAD
-//staff routes
-app.use('/staff', require('./Staff/Customers'));
-app.use('/staff', require('./Staff/Contract'));
-app.use('/staff', require('./Staff/bills'));
-app.use('/staff', require("./Staff/AllInformation"));
-
-//question
-app.use('/question', require('./Question/Question'));
-app.listen(process.env.port_serverNode, () => {
-    console.log("Server is running on port " + process.env.port_serverNode);
-=======
-// Các route Staff
-// Lưu ý: Kiểm tra lại đường dẫn require nếu file chưa tồn tại
+// --- Admin Routes ---
 try {
-    app.use('/staff', require('./Staff/Customers'));
-    app.use('/staff', require('./Staff/Contract'));
-    app.use('/staff', require('./Staff/bills'));
+    const countRoute = require('./Admin/Count');
+    const addSiteRoute = require('./Admin/AddSite');
+    const sitesRoute = require('./Admin/Sites');
+    const staffsRoute = require('./Admin/Staffs');
+
+    app.use('/admin', countRoute);
+    app.use('/admin/addsite', addSiteRoute);
+    app.use('/admin', sitesRoute);
+    app.use('/admin', staffsRoute);
 } catch (error) {
-    console.warn("⚠️ Cảnh báo: Một số route Staff chưa tồn tại hoặc lỗi đường dẫn.");
+    console.warn("⚠️ Cảnh báo: Lỗi import route Admin.", error.message);
 }
+
+// --- Staff Routes ---
+try {
+    app.use('/employee', require('./Staff/Customers'));
+    app.use('/employee', require('./Staff/Contract'));
+    app.use('/employee', require('./Staff/bills'));
+    app.use('/employee', require("./Staff/AllInformation"));
+} catch (error) {
+    console.warn("⚠️ Cảnh báo: Lỗi import route Staff.", error.message);
+}
+
+// --- Question Route ---
+try {
+    app.use('/question', require('./Question/Question'));
+} catch (error) {
+    console.warn("⚠️ Cảnh báo: Lỗi import route Question.", error.message);
+}
+
 
 // ==================================================================
 // 4. KHỞI CHẠY SERVER
@@ -105,7 +103,7 @@ try {
 const PORT = process.env.port_serverNode || 9999;
 app.listen(PORT, () => {
     console.log("========================================");
-    console.log("🚀 Server is running on port " + PORT);
+    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`🔗 Access at: http://localhost:${PORT}`);
     console.log("========================================");
->>>>>>> 1c44348d6bf305bcc19d5098cc1d11705c81cee2
 });

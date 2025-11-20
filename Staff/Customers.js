@@ -11,7 +11,6 @@ router.get('/customers', verifyToken, async (req, res) => {
         const pool1 = await db.GetManh1DBPool();
         const pool2 = await db.GetManh2DBPool();
         const pool3 = await db.GetManh3DBPool();
-
         const request1 = pool1.request();
         const request2 = pool2.request();
         const request3 = pool3.request();
@@ -37,7 +36,7 @@ router.post('/customers', verifyToken, async (req, res) => {
         const { maKH, tenKH, maCN, thanhpho } = req.body;
         // Nếu có thì check tổng xem có hợp đồng chưa thanh toán bên khác hay không và hợp đồng bao nhiêu
         const queryIsPaid = `use DienLuc
-select * from hopdong where hopdong.isPaid=0 and maKH=@maKH`;
+    select * from hopdong where hopdong.isPaid=0 and maKH=@maKH`;
 
         const pool1 = await db.GetManh1DBPool();
         const pool2 = await db.GetManh2DBPool();
@@ -78,6 +77,7 @@ select * from hopdong where hopdong.isPaid=0 and maKH=@maKH`;
         return res.status(500).json({ isAdded: false, success: false, message: "Lỗi máy chủ khi thêm khách hàng" });
     }
 
+
 });
 router.put('/customers/:id', verifyToken, async (req, res) => {
     try {
@@ -106,6 +106,7 @@ router.put('/customers/:id', verifyToken, async (req, res) => {
     } catch (error) {
         console.error("Lỗi khi thêm khách hàng:", error);
         return res.status(500).json({ success: false, message: "Lỗi máy chủ khi chỉnh sửa khách hàng" });
+>>>>>>> 309b86997ca2d388cb8820ee101480d7dfe25b4d
     }
 
 }); router.delete('/customers/:id', verifyToken, async (req, res) => {
