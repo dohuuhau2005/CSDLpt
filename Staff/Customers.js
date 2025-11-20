@@ -7,7 +7,7 @@ const { tp1, tp2, tp3 } = require('../src/Config/logger');
 router.get('/customers', verifyToken, async (req, res) => {
     try {
         const maNV = req.query.maNV;
-        const query = 'use DienLuc SELECT *  FROM khachhang,nhanvien where khachhang.maCN=nhanvien.maCN and nhanvien.maNV=@maNV';
+        const query = 'use DienLuc SELECT maKH,tenKH,khachhang.maCN,maNV,hoten  FROM khachhang,nhanvien where khachhang.maCN=nhanvien.maCN and nhanvien.maNV=@maNV';
         const pool1 = await db.GetManh1DBPool();
         const pool2 = await db.GetManh2DBPool();
         const pool3 = await db.GetManh3DBPool();
@@ -106,7 +106,7 @@ router.put('/customers/:id', verifyToken, async (req, res) => {
     } catch (error) {
         console.error("Lỗi khi thêm khách hàng:", error);
         return res.status(500).json({ success: false, message: "Lỗi máy chủ khi chỉnh sửa khách hàng" });
->>>>>>> 309b86997ca2d388cb8820ee101480d7dfe25b4d
+
     }
 
 }); router.delete('/customers/:id', verifyToken, async (req, res) => {
