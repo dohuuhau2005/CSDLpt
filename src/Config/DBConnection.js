@@ -1,3 +1,4 @@
+const { config } = require('dotenv');
 const sql = require('mssql');
 
 const dbConfigManh1 = {
@@ -88,6 +89,23 @@ const dbConfigManh2Users = {
 
 };
 
+const dbConfigManh2UsersLocal = {
+    user: process.env.DB_User,
+    password: process.env.DB_PasswordLocal,
+    server: process.env.DB_ServerLocal,
+    port: 1434,
+    database: process.env.DB_UserManage,
+    options: {
+        encrypt: true, // bắt buộc nếu dùng Azure
+        trustServerCertificate: true, // cần thiết cho local SQL Server
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+
+};
 
 
 
@@ -144,15 +162,22 @@ const GetManh3DBPool = async () => {
     }
 };
 const GetManh2UserDBPool = async () => {
-    try {
-        secondaryDBPool = new sql.ConnectionPool(dbConfigManh2Users);
-        await secondaryDBPool.connect();
-        console.log("Kết nối đến cơ sở dữ liệu Mảnh ", process.env.DB_UserManage);
-        return secondaryDBPool;
+    const serverUsers = [
+        { name: "server 1434", config: dbConfigManh2Users },
+        { name: "server user local", config: dbConfigManh2UsersLocal }
+    ]
+    for (const server of serverUsers) {
+        try {
+            secondaryDBPool = new sql.ConnectionPool(server.config);
+            await secondaryDBPool.connect();
+            console.log("Kết nối đến cơ sở dữ liệu Mảnh ", server.name);
+            return secondaryDBPool;
+        }
+        catch (err) {
+            console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 3 " + process.env.DB_User, err);
+
+        }
     }
-    catch (err) {
-        console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 3 " + process.env.DB_User, err);
-        throw err;
-    }
+    throw new Error("Lỗi toàn bộ server đăng nhập");
 };
 module.exports = { GetManh1DBPool, GetManh2DBPool, GetManh3DBPool, GetManh2UserDBPool };
