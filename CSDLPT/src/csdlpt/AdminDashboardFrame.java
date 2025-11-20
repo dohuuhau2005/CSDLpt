@@ -5,6 +5,23 @@
 package csdlpt;
 
 import java.awt.CardLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -15,11 +32,26 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
     /**
      * Creates new form AdminDashboardFrame
      */
+    
+    private String userToken; 
+    private final String API_BASE_URL = "http://127.0.0.1:9999";
+    
     public AdminDashboardFrame() {
         initComponents();
-        CardLayout cl = (CardLayout)(contentPanel.getLayout());
-    cl.show(contentPanel, "Dashboard");
     }
+    
+   public AdminDashboardFrame(String token) {
+        this.userToken = token;
+        initComponents();
+        
+        // Gọi các hàm khởi tạo logic (bạn sẽ copy vào sau)
+        initCustomLogic(); 
+        
+        // Mặc định vào trang Dashboard
+        switchScreen("Dashboard");
+        loadDashboardData();
+    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -475,6 +507,368 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
             }
         });
     }
+    
+    
+    
+    
+    // ==============================================================
+    // PHẦN 1: CÁC HÀM HELPER (GỬI API, XỬ LÝ JSON, MENU CHUỘT PHẢI)
+    // ==============================================================
+
+    // 1. Hàm Gửi Request tới Node.js (GET, POST, PUT, DELETE)
+    private String sendRequest(String endpoint, String method, String jsonInput) {
+        try {
+            URL url = new URL(API_BASE_URL + endpoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setRequestProperty("Content-Type", "application/json");
+            // Gửi Token đi để Server xác thực
+            if (userToken != null) {
+                conn.setRequestProperty("Authorization", userToken); 
+            }
+            conn.setDoOutput(true);
+
+            // Gửi dữ liệu JSON (nếu có)
+            if (jsonInput != null && !jsonInput.isEmpty()) {
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonInput.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+            }
+
+            // Nhận kết quả trả về
+            int code = conn.getResponseCode();
+            InputStreamReader reader = (code >= 200 && code < 300) 
+                    ? new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)
+                    : new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8);
+
+            StringBuilder response = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(reader)) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line.trim());
+                }
+            }
+            return response.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 2. Hàm lấy giá trị từ chuỗi JSON
+    private String extractJsonValue(String json, String key) {
+        try {
+            String search = "\"" + key + "\":";
+            int start = json.indexOf(search);
+            if (start == -1) return "0";
+            start += search.length();
+            while (json.charAt(start) == ' ' || json.charAt(start) == '"') start++;
+            int end = start;
+            while (end < json.length() && json.charAt(end) != '"' && json.charAt(end) != ',' && json.charAt(end) != '}') {
+                end++;
+            }
+            return json.substring(start, end).trim();
+        } catch (Exception e) { return "0"; }
+    }
+
+    // 3. Hàm tách danh sách JSON (Để đổ vào bảng)
+    private List<String[]> parseJsonArray(String json, String arrayKey, String[] fields) {
+        List<String[]> list = new ArrayList<>();
+        try {
+            int arrayStart = json.indexOf("\"" + arrayKey + "\":[");
+            if (arrayStart == -1) return list;
+            String content = json.substring(arrayStart + arrayKey.length() + 4);
+            int arrayEnd = content.lastIndexOf("]");
+            if (arrayEnd == -1) return list;
+            content = content.substring(0, arrayEnd);
+            String[] objects = content.split("\\},\\{");
+            for (String obj : objects) {
+                String[] row = new String[fields.length];
+                for (int i = 0; i < fields.length; i++) {
+                    row[i] = extractJsonValue(obj, fields[i]);
+                }
+                list.add(row);
+            }
+        } catch (Exception e) { }
+        return list;
+    }
+
+    // 4. Hàm tạo Menu Chuột Phải (Sửa/Xóa)
+    private void addContextMenu(JTable table, Runnable editAction, Runnable deleteAction) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem editItem = new JMenuItem("Sửa thông tin / Chuyển CT");
+        JMenuItem deleteItem = new JMenuItem("Xóa dòng này");
+
+        editItem.addActionListener(e -> editAction.run());
+        deleteItem.addActionListener(e -> deleteAction.run());
+
+        popupMenu.add(editItem);
+        popupMenu.add(deleteItem);
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { handle(e); }
+            @Override public void mouseReleased(MouseEvent e) { handle(e); }
+            private void handle(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    JTable source = (JTable) e.getSource();
+                    int row = source.rowAtPoint(e.getPoint());
+                    if (!source.isRowSelected(row)) source.changeSelection(row, 0, false, false);
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+    }
+
+    // ==============================================================
+    // PHẦN 2: CÁC HÀM LOGIC 
+    // ==============================================================
+
+    // Hàm khởi tạo logic chung (Sửa lỗi initCustomLogic)
+    private void initCustomLogic() {
+        initTableConfigs();    // Cấu hình bảng
+        setupButtonEvents();   // Cấu hình nút bấm
+    }
+
+    // Hàm chuyển màn hình (Sửa lỗi switchScreen)
+    private void switchScreen(String cardName) {
+        CardLayout cl = (CardLayout) (contentPanel.getLayout());
+        cl.show(contentPanel, cardName);
+    }
+
+    // Hàm load Dashboard (Sửa lỗi loadDashboardData)
+    private void loadDashboardData() {
+        new Thread(() -> {
+            String cSite = extractJsonValue(sendRequest("/admin/CountSite", "GET", null), "totalCount");
+            String cCust = extractJsonValue(sendRequest("/admin/CountCustomer", "GET", null), "totalCount");
+            String cStaff = extractJsonValue(sendRequest("/admin/CountStaff", "GET", null), "totalCount");
+
+            SwingUtilities.invokeLater(() -> {
+                DefaultTableModel model = (DefaultTableModel) tblDashboardReport.getModel();
+                model.setRowCount(0);
+                model.addRow(new Object[]{"Tổng Chi Nhánh", cSite});
+                model.addRow(new Object[]{"Tổng Khách Hàng", cCust});
+                model.addRow(new Object[]{"Tổng Nhân Viên", cStaff});
+            });
+        }).start();
+    }
+
+    // ==============================================================
+    // PHẦN 3: CẤU HÌNH UI VÀ SỰ KIỆN
+    // ==============================================================
+
+    private void initTableConfigs() {
+        // Bảng Dashboard
+        tblDashboardReport.setModel(new DefaultTableModel(new Object[][]{}, new String[]{"Danh Mục", "Số Lượng"}));
+
+        // Bảng Chi Nhánh
+        tblBranchs.setModel(new DefaultTableModel(new Object[][]{}, new String[]{"Mã CN", "Tên Chi Nhánh", "Thành Phố"}) {
+            @Override public boolean isCellEditable(int row, int column) { return false; }
+        });
+        addContextMenu(tblBranchs, () -> editBranch(), () -> deleteBranch());
+
+        // Bảng Nhân Viên
+        tblSaffs.setModel(new DefaultTableModel(new Object[][]{}, new String[]{"Mã NV", "Họ Tên", "Mã CN"}) {
+            @Override public boolean isCellEditable(int row, int column) { return false; }
+        });
+        addContextMenu(tblSaffs, () -> editStaff(), () -> deleteStaff());
+        
+        // Bảng Câu 1
+        tblQuerry.setModel(new DefaultTableModel(new Object[][]{}, new String[]{"Số HĐ Nước", "Tháng", "Năm", "Số Tiền"}) {
+        @Override public boolean isCellEditable(int row, int column) { return false; }
+    });
+    }
+
+    private void setupButtonEvents() {
+        // Nút điều hướng Menu
+        btnTongQuan.addActionListener(e -> { switchScreen("Dashboard"); loadDashboardData(); });
+        btnQuanLyChiNhanh.addActionListener(e -> { switchScreen("QuanLyChiNhanh"); loadBranchData(); });
+        btnQuanLyNhanVien.addActionListener(e -> { switchScreen("QuanLyNhanVien"); loadStaffData(); });
+
+        // Nút chức năng
+        btnAddBranch.addActionListener(e -> addBranch());
+        // Kiểm tra null nếu bạn chưa đặt tên biến này hoặc chưa tạo nút
+        if (jButton1 != null) jButton1.addActionListener(e -> addStaff()); 
+        
+        if (btnSearrch != null) btnSearrch.addActionListener(e -> JOptionPane.showMessageDialog(this, "Tính năng đang phát triển"));
+        btnCau1.addActionListener(e -> {
+        loadCau1Data();});
+    }
+
+    // ==============================================================
+    // PHẦN 4: CÁC HÀM XỬ LÝ NGHIỆP VỤ (CRUD)
+    // ==============================================================
+
+    // --- CHI NHÁNH ---
+    private void loadBranchData() {
+        new Thread(() -> {
+            String res = sendRequest("/admin/sites", "GET", null);
+            List<String[]> data = parseJsonArray(res, "sites", new String[]{"maCN", "tenCN", "thanhpho"});
+            SwingUtilities.invokeLater(() -> {
+                DefaultTableModel model = (DefaultTableModel) tblBranchs.getModel();
+                model.setRowCount(0);
+                for (String[] row : data) model.addRow(row);
+            });
+        }).start();
+    }
+
+    private void addBranch() {
+        javax.swing.JTextField txtMa = new javax.swing.JTextField();
+        javax.swing.JTextField txtTen = new javax.swing.JTextField();
+        javax.swing.JComboBox<String> cbCity = new javax.swing.JComboBox<>(new String[]{"TP1", "TP2", "TP3"});
+        Object[] msg = {"Mã CN:", txtMa, "Tên CN:", txtTen, "Thành Phố:", cbCity};
+        
+        if (JOptionPane.showConfirmDialog(this, msg, "Thêm Chi Nhánh", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            String json = String.format("{\"maCN\":\"%s\", \"tenCN\":\"%s\", \"thanhpho\":\"%s\"}", 
+                    txtMa.getText(), txtTen.getText(), cbCity.getSelectedItem());
+            if (sendRequest("/admin/addsite", "POST", json).contains("true")) {
+                JOptionPane.showMessageDialog(this, "Thêm thành công!");
+                loadBranchData();
+            } else JOptionPane.showMessageDialog(this, "Thất bại!");
+        }
+    }
+
+    private void deleteBranch() {
+        int row = tblBranchs.getSelectedRow();
+        if (row == -1) return;
+        String maCN = tblBranchs.getValueAt(row, 0).toString();
+        if (JOptionPane.showConfirmDialog(this, "Xóa chi nhánh " + maCN + "?", "Cảnh báo", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            String res = sendRequest("/admin/sites/" + maCN, "DELETE", null);
+            if (res.contains("true")) {
+                JOptionPane.showMessageDialog(this, "Đã xóa!");
+                loadBranchData();
+            } else JOptionPane.showMessageDialog(this, "Lỗi: " + extractJsonValue(res, "message"));
+        }
+    }
+
+    private void editBranch() {
+        int row = tblBranchs.getSelectedRow();
+        if (row == -1) return;
+        String maCN = tblBranchs.getValueAt(row, 0).toString();
+        String tenOld = tblBranchs.getValueAt(row, 1).toString();
+        String cityOld = tblBranchs.getValueAt(row, 2).toString(); 
+
+        String newName = JOptionPane.showInputDialog(this, "Đổi tên chi nhánh " + maCN + ":", tenOld);
+        if (newName != null) {
+            String json = String.format("{\"tenCN\":\"%s\", \"thanhpho\":\"%s\"}", newName, cityOld);
+            if (sendRequest("/admin/sites/" + maCN, "PUT", json).contains("true")) {
+                JOptionPane.showMessageDialog(this, "Đã cập nhật!");
+                loadBranchData();
+            } else JOptionPane.showMessageDialog(this, "Lỗi cập nhật!");
+        }
+    }
+
+    // --- NHÂN VIÊN ---
+    private void loadStaffData() {
+        new Thread(() -> {
+            String res = sendRequest("/admin/staffs", "GET", null);
+            List<String[]> data = parseJsonArray(res, "staffs", new String[]{"maNV", "hoten", "maCN"});
+            SwingUtilities.invokeLater(() -> {
+                DefaultTableModel model = (DefaultTableModel) tblSaffs.getModel();
+                model.setRowCount(0);
+                for (String[] row : data) model.addRow(new Object[]{row[0], row[1], row[2]});
+            });
+        }).start();
+    }
+
+    private void addStaff() {
+        javax.swing.JTextField txtMa = new javax.swing.JTextField();
+        javax.swing.JTextField txtTen = new javax.swing.JTextField();
+        javax.swing.JTextField txtEmail = new javax.swing.JTextField();
+        javax.swing.JPasswordField txtPass = new javax.swing.JPasswordField();
+        javax.swing.JTextField txtMaCN = new javax.swing.JTextField();
+        javax.swing.JComboBox<String> cbCity = new javax.swing.JComboBox<>(new String[]{"TP1", "TP2", "TP3"});
+        
+        Object[] msg = {"Mã NV:", txtMa, "Họ Tên:", txtTen, "Email:", txtEmail, "Mật khẩu:", txtPass, "Mã CN:", txtMaCN, "Thành phố:", cbCity};
+        
+        if (JOptionPane.showConfirmDialog(this, msg, "Thêm Nhân Viên", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            String json = String.format("{\"maNV\":\"%s\",\"hoten\":\"%s\",\"Email\":\"%s\",\"Password\":\"%s\",\"maCN\":\"%s\",\"thanhpho\":\"%s\"}", 
+                    txtMa.getText(), txtTen.getText(), txtEmail.getText(), new String(txtPass.getPassword()), txtMaCN.getText(), cbCity.getSelectedItem());
+            if (sendRequest("/admin/staffs", "POST", json).contains("true")) {
+                JOptionPane.showMessageDialog(this, "Thêm NV thành công!");
+                loadStaffData();
+            } else JOptionPane.showMessageDialog(this, "Thêm thất bại!");
+        }
+    }
+
+    private void deleteStaff() {
+        int row = tblSaffs.getSelectedRow();
+        if (row == -1) return;
+        String maNV = tblSaffs.getValueAt(row, 0).toString();
+        if (JOptionPane.showConfirmDialog(this, "Xóa nhân viên " + maNV + "?", "Cảnh báo", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            if (sendRequest("/admin/staffs/" + maNV, "DELETE", null).contains("true")) {
+                JOptionPane.showMessageDialog(this, "Đã xóa!");
+                loadStaffData();
+            } else JOptionPane.showMessageDialog(this, "Xóa thất bại!");
+        }
+    }
+
+    private void editStaff() {
+        int row = tblSaffs.getSelectedRow();
+        if (row == -1) return;
+        String maNV = tblSaffs.getValueAt(row, 0).toString();
+        String tenCu = tblSaffs.getValueAt(row, 1).toString();
+        String cnCu = tblSaffs.getValueAt(row, 2).toString();
+
+        javax.swing.JTextField txtTen = new javax.swing.JTextField(tenCu);
+        javax.swing.JTextField txtCN = new javax.swing.JTextField(cnCu);
+        javax.swing.JComboBox<String> cbCity = new javax.swing.JComboBox<>(new String[]{"TP1", "TP2", "TP3"});
+        
+        Object[] msg = {"Mã NV (Không sửa): " + maNV, "Họ Tên:", txtTen, "Chuyển tới Mã CN:", txtCN, "Thuộc TP:", cbCity};
+        
+        if (JOptionPane.showConfirmDialog(this, msg, "Sửa / Chuyển Công Tác", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            String json = String.format("{\"hoten\":\"%s\", \"maCN\":\"%s\", \"thanhpho\":\"%s\"}", 
+                    txtTen.getText(), txtCN.getText(), cbCity.getSelectedItem());
+            String res = sendRequest("/admin/staffs/" + maNV, "PUT", json);
+            if (res.contains("true")) {
+                JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
+                loadStaffData();
+            } else JOptionPane.showMessageDialog(this, "Lỗi: " + extractJsonValue(res, "message"));
+        }
+    }
+    
+    // Trong AdminDashboardFrame.java
+//  Hàm load dữ liệu cho Truy vấn Câu 1
+private void loadCau1Data() {
+    new Thread(() -> {
+        // 1. Lấy tham số truy vấn từ các trường nhập liệu
+        String maNV = txtMNV.getText().trim();
+        String maKH = txtMKH.getText().trim();
+
+        if (maNV.isEmpty() || maKH.isEmpty()) {
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Vui lòng nhập Mã Nhân Viên và Mã Khách Hàng.", "Lỗi nhập liệu", JOptionPane.WARNING_MESSAGE));
+            return;
+        }
+
+        // 2. Chuẩn bị Endpoint với Query Parameters
+        String endpoint = String.format("/api/cau1?maNV=%s&maKH=%s", maNV, maKH);
+        
+        // 3. Gọi API
+        String res = sendRequest(endpoint, "GET", null);
+        
+        // Kiểm tra lỗi trả về từ API
+        if (res == null || res.contains("\"success\":false")) {
+             String message = extractJsonValue(res, "message");
+             SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Truy vấn thất bại: " + message, "Lỗi API", JOptionPane.ERROR_MESSAGE));
+             return;
+        }
+
+        // 4. Phân tích kết quả JSON
+        String[] fields = {"soHDN", "thang", "nam", "soTien"};
+        List<String[]> data = parseJsonArray(res, "hoatong", fields);
+
+        // 5. Cập nhật giao diện (trên EDT)
+        SwingUtilities.invokeLater(() -> {
+            DefaultTableModel model = (DefaultTableModel) tblQuerry.getModel();
+            model.setRowCount(0); // Xóa dữ liệu cũ
+            for (String[] row : data) model.addRow(row);
+            
+            if (data.isEmpty()) {
+                 JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn nào.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }).start();
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel branchManagementPanel;
