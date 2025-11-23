@@ -14,7 +14,7 @@ app.use(cors());
 
 // Xử lý dữ liệu JSON gửi lên (Thay thế body-parser)
 // Đây là dòng sửa lỗi "Cannot destructure property... of undefined"
-app.use(express.json()); 
+app.use(express.json());
 
 // Xử lý dữ liệu từ form (nếu có)
 app.use(express.urlencoded({ extended: true }));
@@ -61,7 +61,7 @@ app.get("/", (req, res) => {
 
 // Import và sử dụng các file route
 const loginRoute = require('./src/Route/Login');
-app.use('/login', loginRoute); 
+app.use('/login', loginRoute);
 
 // --- Admin Routes ---
 try {
@@ -74,6 +74,7 @@ try {
     app.use('/admin/addsite', addSiteRoute);
     app.use('/admin', sitesRoute);
     app.use('/admin', staffsRoute);
+    app.use('/admin', require('./Admin/History'));
 } catch (error) {
     console.warn("⚠️ Cảnh báo: Lỗi import route Admin.", error.message);
 }
@@ -81,9 +82,9 @@ try {
 // --- Staff Routes ---
 try {
     app.use('/employee', require('./Staff/Customers'));
-    app.use('/employee', require('./Staff/Contract'));
-    app.use('/employee', require('./Staff/bills'));
-    app.use('/employee', require("./Staff/AllInformation"));
+    app.use('/employee', require('./Staff/Contract'));
+    app.use('/employee', require('./Staff/bills'));
+    app.use('/employee', require("./Staff/AllInformation"));
 } catch (error) {
     console.warn("⚠️ Cảnh báo: Lỗi import route Staff.", error.message);
 }
