@@ -177,13 +177,13 @@ const GetManh2DBPool = async () => {
     { name: "server Local 1436", config: dbConfigManhlocal2 }]
     for (const server of serverPrior2) {
         try {
-            secondaryDBPool = new sql.ConnectionPool(dbConfigManh2);
+            secondaryDBPool = new sql.ConnectionPool(server.config);
             await secondaryDBPool.connect();
-            console.log("Kết nối đến cơ sở dữ liệu Mảnh 2 !");
+            console.log("Kết nối đến cơ sở dữ liệu Mảnh 2 của " + server.name);
             return secondaryDBPool;
         }
         catch (err) {
-            console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 2 " + process.env.DB_User, err);
+            console.error("Lỗi kết nối đến cơ sở dữ liệu: Mảnh 2 của" + server.name, err);
 
         }
     }
