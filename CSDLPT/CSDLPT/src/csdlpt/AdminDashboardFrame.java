@@ -50,6 +50,7 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         // Mặc định vào trang Dashboard
         switchScreen("Dashboard");
         loadDashboardData();
+        loadHistoryData();
     }
     
 
@@ -70,6 +71,7 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         btnQuanLyChiNhanh = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
+        btnDX = new javax.swing.JButton();
         contentPanel = new javax.swing.JPanel();
         queryPanel = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
@@ -91,6 +93,8 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblDashboardReport = new javax.swing.JTable();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        tblHistory = new javax.swing.JTable();
         staffManagementPanel = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         txtSearchSaff = new javax.swing.JTextField();
@@ -136,45 +140,59 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
 
         jLabel8.setText("ADMIN");
 
+        btnDX.setText("Đăng Xuất");
+        btnDX.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDXActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout sidebarPanelLayout = new javax.swing.GroupLayout(sidebarPanel);
         sidebarPanel.setLayout(sidebarPanelLayout);
         sidebarPanelLayout.setHorizontalGroup(
             sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sidebarPanelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnQuanLyChiNhanh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(sidebarPanelLayout.createSequentialGroup()
-                        .addGroup(sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnTongQuan, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
-                            .addComponent(btnQuanLyNhanVien, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnTruyVan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(0, 1, Short.MAX_VALUE)))
+                        .addContainerGap()
+                        .addGroup(sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnQuanLyChiNhanh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(sidebarPanelLayout.createSequentialGroup()
+                                .addGroup(sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(btnTongQuan, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
+                                    .addComponent(btnQuanLyNhanVien, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(btnTruyVan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(0, 1, Short.MAX_VALUE))))
+                    .addGroup(sidebarPanelLayout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addGroup(sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(sidebarPanelLayout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addComponent(jLabel8))
+                            .addComponent(jLabel1))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(sidebarPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(btnDX, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(sidebarPanelLayout.createSequentialGroup()
-                .addGap(32, 32, 32)
-                .addGroup(sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(sidebarPanelLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel8))
-                    .addComponent(jLabel1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         sidebarPanelLayout.setVerticalGroup(
             sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sidebarPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(6, 6, 6)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8)
-                .addGap(3, 3, 3)
+                .addGap(9, 9, 9)
                 .addComponent(btnTongQuan, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnQuanLyChiNhanh, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnQuanLyNhanVien, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnTruyVan, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnDX)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -218,11 +236,9 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
                             .addGroup(queryPanelLayout.createSequentialGroup()
                                 .addGap(47, 47, 47)
                                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(queryPanelLayout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(queryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtMKH, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
-                                    .addComponent(txtMNV))))
+                            .addGroup(queryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtMKH, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                                .addComponent(txtMNV)))
                         .addGap(0, 97, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, queryPanelLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -328,27 +344,46 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tblDashboardReport);
 
+        tblHistory.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane5.setViewportView(tblHistory);
+
         javax.swing.GroupLayout dashboardScreenPanelLayout = new javax.swing.GroupLayout(dashboardScreenPanel);
         dashboardScreenPanel.setLayout(dashboardScreenPanelLayout);
         dashboardScreenPanelLayout.setHorizontalGroup(
             dashboardScreenPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, dashboardScreenPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel2)
-                .addGap(125, 125, 125))
             .addGroup(dashboardScreenPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 424, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(28, Short.MAX_VALUE)
+                .addGroup(dashboardScreenPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, dashboardScreenPanelLayout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, dashboardScreenPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(130, 130, 130))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, dashboardScreenPanelLayout.createSequentialGroup()
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
         dashboardScreenPanelLayout.setVerticalGroup(
             dashboardScreenPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(dashboardScreenPanelLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
+                .addGap(19, 19, 19)
                 .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(82, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         contentPanel.add(dashboardScreenPanel, "Dashboard");
@@ -437,7 +472,7 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
                 .addGap(48, 48, 48)
                 .addComponent(mainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(contentPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(contentPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE)
         );
 
         pack();
@@ -473,6 +508,22 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSearchSaffActionPerformed
 
+    private void btnDXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDXActionPerformed
+        // TODO add your handling code here:
+        int choice = JOptionPane.showConfirmDialog(this, 
+                                               "Bạn có chắc chắn muốn đăng xuất?", 
+                                               "Xác nhận", 
+                                               JOptionPane.YES_NO_OPTION);
+    
+    if (choice == JOptionPane.YES_OPTION) {
+        // 2. Đóng cửa sổ hiện tại
+        this.dispose(); 
+        
+        // 3. Mở lại màn hình đăng nhập
+        new csdlpt.LoginFrame().setVisible(true); 
+    }
+    }//GEN-LAST:event_btnDXActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -503,7 +554,7 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new AdminDashboardFrame().setVisible(true);
+                new LoginFrame().setVisible(true);
             }
         });
     }
@@ -677,11 +728,19 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         tblQuerry.setModel(new DefaultTableModel(new Object[][]{}, new String[]{"Số HĐ Nước", "Tháng", "Năm", "Số Tiền"}) {
         @Override public boolean isCellEditable(int row, int column) { return false; }
     });
+        // Bảng History
+        tblHistory.setModel(new DefaultTableModel(
+            new Object[][]{}, 
+            new String[]{"ID", "Mã NV", "Ngày Chuyển", "Mã CN Cũ", "Mã CN Mới", "Mã KH"} 
+        ) {
+            @Override public boolean isCellEditable(int row, int column) { return false; }
+        });
+        
     }
 
     private void setupButtonEvents() {
         // Nút điều hướng Menu
-        btnTongQuan.addActionListener(e -> { switchScreen("Dashboard"); loadDashboardData(); });
+        btnTongQuan.addActionListener(e -> { switchScreen("Dashboard"); loadDashboardData();loadHistoryData(); });
         btnQuanLyChiNhanh.addActionListener(e -> { switchScreen("QuanLyChiNhanh"); loadBranchData(); });
         btnQuanLyNhanVien.addActionListener(e -> { switchScreen("QuanLyNhanVien"); loadStaffData(); });
 
@@ -690,7 +749,9 @@ public class AdminDashboardFrame extends javax.swing.JFrame {
         // Kiểm tra null nếu bạn chưa đặt tên biến này hoặc chưa tạo nút
         if (jButton1 != null) jButton1.addActionListener(e -> addStaff()); 
         
-        if (btnSearrch != null) btnSearrch.addActionListener(e -> JOptionPane.showMessageDialog(this, "Tính năng đang phát triển"));
+        btnAdddSaff.addActionListener(e -> searchStaffData());
+        
+       if (btnSearrch != null) btnSearrch.addActionListener(e -> searchBranchData());
         btnCau1.addActionListener(e -> {
         loadCau1Data();});
     }
@@ -841,7 +902,7 @@ private void loadCau1Data() {
         }
 
         // 2. Chuẩn bị Endpoint với Query Parameters
-        String endpoint = String.format("/api/cau1?maNV=%s&maKH=%s", maNV, maKH);
+        String endpoint = String.format("/question/cau1?maNV=%s&maKH=%s", maNV, maKH);
         
         // 3. Gọi API
         String res = sendRequest(endpoint, "GET", null);
@@ -870,11 +931,115 @@ private void loadCau1Data() {
     }).start();
 }
 
+// Thêm hàm searchBranchData()
+private void searchBranchData() {
+    final String searchText = txtSearch.getText().trim().toLowerCase();
+    
+    new Thread(() -> {
+        // 1. Lấy toàn bộ dữ liệu
+        String res = sendRequest("/admin/sites", "GET", null);
+        List<String[]> allData = parseJsonArray(res, "sites", new String[]{"maCN", "tenCN", "thanhpho"});
+        
+        // 2. Khai báo và Lọc dữ liệu HOÀN TOÀN bên trong khối Thread
+        List<String[]> filteredData; // <--- KHAI BÁO BÊN TRONG THREAD
+        if (searchText.isEmpty()) {
+            filteredData = allData;
+        } else {
+            filteredData = new ArrayList<>(); // Khởi tạo nếu cần lọc
+            for (String[] row : allData) {
+                if (row[0].toLowerCase().contains(searchText) || row[1].toLowerCase().contains(searchText)) {
+                    filteredData.add(row);
+                }
+            }
+        }
+        
+        // 3. Cập nhật giao diện (sử dụng filteredData HOÀN TOÀN bên trong runLater)
+        final List<String[]> finalFilteredData = filteredData; // Biến final để dùng trong lambda
+        SwingUtilities.invokeLater(() -> {
+            DefaultTableModel model = (DefaultTableModel) tblBranchs.getModel();
+            model.setRowCount(0);
+            for (String[] row : finalFilteredData) model.addRow(row); // <--- Dùng biến final
+            
+            if (finalFilteredData.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy chi nhánh nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }).start();
+}
+// Thêm hàm này vào class AdminDashboardFrame
+private void loadHistoryData() {
+        new Thread(() -> {
+            // 1. Gọi API
+            String res = sendRequest("/admin/historyRecords", "GET", null);
+
+            // 2. Kiểm tra dữ liệu trả về
+            if (res == null || !res.contains("\"success\":true")) {
+                System.out.println("Lỗi tải lịch sử: " + res);
+                return;
+            }
+
+            // 3. Phân tích JSON
+            // SỬA LẠI: Các key trong mảng String[] phải khớp chính xác với tên cột trong ảnh bạn gửi
+            List<String[]> data = parseJsonArray(res, "history", 
+                new String[]{"id", "MaNV", "NgayChuyen", "maCNCu", "maCNMoi", "MaKH"} 
+            );
+
+            // 4. Đẩy dữ liệu lên bảng
+            SwingUtilities.invokeLater(() -> {
+                DefaultTableModel model = (DefaultTableModel) tblHistory.getModel();
+                model.setRowCount(0); // Xóa dữ liệu cũ
+                for (String[] row : data) {
+                    // row sẽ chứa dữ liệu theo thứ tự đã khai báo ở bước 3
+                    model.addRow(row);
+                }
+            });
+        }).start();
+    }
+
+// Thêm hàm searchStaffData()
+private void searchStaffData() {
+    final String searchText = txtSearchSaff.getText().trim().toLowerCase();
+    
+    new Thread(() -> {
+        // 1. Lấy toàn bộ dữ liệu
+        String res = sendRequest("/admin/staffs", "GET", null);
+        List<String[]> allData = parseJsonArray(res, "staffs", new String[]{"maNV", "hoten", "maCN"});
+        
+        // 2. Khai báo và Lọc dữ liệu HOÀN TOÀN bên trong khối Thread
+        List<String[]> filteredData;
+        if (searchText.isEmpty()) {
+            filteredData = allData;
+        } else {
+            filteredData = new ArrayList<>();
+            for (String[] row : allData) {
+                if (row[0].toLowerCase().contains(searchText) || row[1].toLowerCase().contains(searchText)) {
+                    filteredData.add(row);
+                }
+            }
+        }
+        
+        // 3. Cập nhật giao diện
+        final List<String[]> finalFilteredData = filteredData; // Biến final để dùng trong lambda
+        SwingUtilities.invokeLater(() -> {
+            DefaultTableModel model = (DefaultTableModel) tblSaffs.getModel();
+            model.setRowCount(0);
+            for (String[] row : finalFilteredData) model.addRow(new Object[]{row[0], row[1], row[2]}); // <--- Dùng biến final
+            
+            if (finalFilteredData.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy nhân viên nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }).start();
+    
+    
+}
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel branchManagementPanel;
     private javax.swing.JButton btnAddBranch;
     private javax.swing.JButton btnAdddSaff;
     private javax.swing.JButton btnCau1;
+    private javax.swing.JButton btnDX;
     private javax.swing.JButton btnQuanLyChiNhanh;
     private javax.swing.JButton btnQuanLyNhanVien;
     private javax.swing.JButton btnSearrch;
@@ -895,12 +1060,14 @@ private void loadCau1Data() {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JPanel queryPanel;
     private javax.swing.JPanel sidebarPanel;
     private javax.swing.JPanel staffManagementPanel;
     private javax.swing.JTable tblBranchs;
     private javax.swing.JTable tblDashboardReport;
+    private javax.swing.JTable tblHistory;
     private javax.swing.JTable tblQuerry;
     private javax.swing.JTable tblSaffs;
     private javax.swing.JTextField txtMKH;

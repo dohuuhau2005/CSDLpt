@@ -231,6 +231,7 @@ private String sendRequest(String endpoint, String method, String jsonInput) {
         btnCau2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        btnDX = new javax.swing.JButton();
         contentPanelEmployee = new javax.swing.JPanel();
         customerManagementPanel = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
@@ -293,24 +294,31 @@ private String sendRequest(String endpoint, String method, String jsonInput) {
         jLabel2.setFont(new java.awt.Font("Dialog", 0, 36)); // NOI18N
         jLabel2.setText("Menu");
 
+        btnDX.setText("Đăng Xuất");
+
         javax.swing.GroupLayout sidebarPanelEmployeeLayout = new javax.swing.GroupLayout(sidebarPanelEmployee);
         sidebarPanelEmployee.setLayout(sidebarPanelEmployeeLayout);
         sidebarPanelEmployeeLayout.setHorizontalGroup(
             sidebarPanelEmployeeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sidebarPanelEmployeeLayout.createSequentialGroup()
                 .addGroup(sidebarPanelEmployeeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(sidebarPanelEmployeeLayout.createSequentialGroup()
-                        .addGap(49, 49, 49)
-                        .addComponent(jLabel1))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, sidebarPanelEmployeeLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(sidebarPanelEmployeeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnCau2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnLapHoaDon, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnQuanLyHopDong, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnDX, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnQuanLyKhachHang, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(sidebarPanelEmployeeLayout.createSequentialGroup()
                         .addGap(27, 27, 27)
-                        .addGroup(sidebarPanelEmployeeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnQuanLyHopDong, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnCau2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnQuanLyKhachHang, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnLapHoaDon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(sidebarPanelEmployeeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(sidebarPanelEmployeeLayout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addComponent(jLabel1))
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 1, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         sidebarPanelEmployeeLayout.setVerticalGroup(
             sidebarPanelEmployeeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -319,15 +327,17 @@ private String sendRequest(String endpoint, String method, String jsonInput) {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(btnQuanLyKhachHang, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnQuanLyHopDong, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnLapHoaDon, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCau2, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnDX, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         mainPanelEmployee.add(sidebarPanelEmployee, java.awt.BorderLayout.WEST);
@@ -601,7 +611,7 @@ private String sendRequest(String endpoint, String method, String jsonInput) {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new EmployeeAppFrame().setVisible(true);
+                new LoginFrame().setVisible(true);
             }
         });
     }
@@ -631,8 +641,9 @@ private String sendRequest(String endpoint, String method, String jsonInput) {
     btnSearchContract.setText("Thêm HĐ");   
     btnSearchContract.addActionListener(e -> addContract());
     
-    btnSearchCustomer.addActionListener(e -> JOptionPane.showMessageDialog(this, "Tính năng tìm kiếm đang phát triển."));
-    btnSearchBill.addActionListener(e -> JOptionPane.showMessageDialog(this, "Tính năng tìm kiếm đang phát triển."));
+    btnSearchCustomer.addActionListener(e -> searchCustomerData());
+    
+    btnSearchBill.addActionListener(e -> searchBillData());
 }
     
     //Hàm Tải thông tin Nhân viên và Khách hàng
@@ -833,7 +844,7 @@ private void payContract() {
     private void loadCau2Data() {
     new Thread(() -> {
         // API này không cần tham số maNV/maKH, nó query chung trên tất cả các site
-        String res = sendRequest("/api/cau2", "GET", null);
+        String res = sendRequest("/question/cau2", "GET", null);
         
         // Kiểm tra lỗi trả về từ API
         if (res == null || res.contains("\"success\":false")) {
@@ -886,6 +897,92 @@ private void payContract() {
         });
     }).start();
 } 
+   
+   
+   // Hàm searchCustomerData
+   
+   private void searchCustomerData() {
+    // 1. Lấy từ khóa tìm kiếm
+    final String searchText = txtSearchCustomer.getText().trim().toLowerCase();
+    
+    if (this.maNV == null) return;
+    
+    new Thread(() -> {
+        // 2. Gọi API để lấy TOÀN BỘ khách hàng của nhân viên này
+        String res = sendRequest("/employee/customers?maNV=" + this.maNV, "GET", null);
+        String[] fields = {"maKH", "tenKH", "maCN"};
+        List<String[]> allData = parseJsonArray(res, "customers", fields);
+        
+        // 3. Lọc dữ liệu trên Client
+        List<String[]> filteredData = new ArrayList<>();
+        if (searchText.isEmpty()) {
+            filteredData = allData;
+        } else {
+            for (String[] row : allData) {
+                // Lọc theo Mã KH (row[0]) hoặc Tên KH (row[1])
+                if (row[0].toLowerCase().contains(searchText) || row[1].toLowerCase().contains(searchText)) {
+                    filteredData.add(row);
+                }
+            }
+        }
+        
+        // 4. Cập nhật giao diện
+        final List<String[]> finalFilteredData = filteredData; 
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblCustomers.getModel();
+            model.setRowCount(0);
+            for (String[] row : finalFilteredData) model.addRow(row);
+            
+            if (finalFilteredData.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng nào phù hợp với từ khóa.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }).start();
+}
+   
+   //  hàm searchBillData
+
+private void searchBillData() {
+    // 1. Lấy từ khóa tìm kiếm
+    final String searchText = txtSearchBill.getText().trim().toLowerCase();
+    
+    if (this.maNV == null) return;
+    
+    new Thread(() -> {
+        // 2. Gọi API để lấy TOÀN BỘ hóa đơn mà nhân viên này đã lập
+        // Endpoint: /employee/bills?maNV=...
+        String res = sendRequest("/employee/bills?maNV=" + this.maNV, "GET", null);
+        
+        // CÁC TRƯỜNG CẦN LẤY TỪ API: soHDN, thang, nam, soHD, maNV, soTien
+        String[] fields = {"soHDN", "thang", "nam", "soHD", "maNV", "soTien"};
+        List<String[]> allData = parseJsonArray(res, "bills", fields);
+        
+        // 3. Lọc dữ liệu trên Client
+        List<String[]> filteredData = new ArrayList<>();
+        if (searchText.isEmpty()) {
+            filteredData = allData;
+        } else {
+            for (String[] row : allData) {
+                // Lọc theo Số HĐN (row[0]) hoặc Số HĐ (row[3])
+                if (row[0].toLowerCase().contains(searchText) || row[3].toLowerCase().contains(searchText)) {
+                    filteredData.add(row);
+                }
+            }
+        }
+        
+        // 4. Cập nhật giao diện
+        final List<String[]> finalFilteredData = filteredData; 
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblBills.getModel();
+            model.setRowCount(0);
+            for (String[] row : finalFilteredData) model.addRow(row);
+            
+            if (finalFilteredData.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn nào phù hợp với từ khóa.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }).start();
+}
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -893,6 +990,7 @@ private void payContract() {
     private javax.swing.JPanel billManagementPanel;
     private javax.swing.JButton btnAddCustomer;
     private javax.swing.JButton btnCau2;
+    private javax.swing.JButton btnDX;
     private javax.swing.JButton btnLapHoaDon;
     private javax.swing.JButton btnQuanLyHopDong;
     private javax.swing.JButton btnQuanLyKhachHang;
