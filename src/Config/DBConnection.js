@@ -72,6 +72,24 @@ const dbConfigManhlocal2 = {
     }
 
 };
+
+const dbConfigManhWindowServer2 = {
+    user: process.env.DB_User,
+    password: process.env.DB_PasswordLocal,
+    server: process.env.DB_WindowServer2,
+
+    database: process.env.DB_Name,
+    options: {
+        encrypt: true, // bắt buộc nếu dùng Azure
+        trustServerCertificate: true, // cần thiết cho local SQL Server
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+
+};
 const dbConfigManh3 = {
     user: process.env.DB_User,
     password: process.env.DB_Password,
@@ -95,6 +113,23 @@ const dbConfigManhlocal3 = {
     password: process.env.DB_PasswordLocal,
     server: process.env.DB_ServerLocal,
     port: 1435,
+    database: process.env.DB_Name,
+    options: {
+        encrypt: true, // bắt buộc nếu dùng Azure
+        trustServerCertificate: true, // cần thiết cho local SQL Server
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+
+};
+const dbConfigManhWindowServer3 = {
+    user: process.env.DB_User,
+    password: process.env.DB_PasswordLocal,
+    server: process.env.DB_WindowServer3,
+
     database: process.env.DB_Name,
     options: {
         encrypt: true, // bắt buộc nếu dùng Azure
@@ -174,7 +209,8 @@ const GetManh1DBPool = async () => {
 
 const GetManh2DBPool = async () => {
     const serverPrior2 = [{ name: "server 1436", config: dbConfigManh2 },
-    { name: "server Local 1436", config: dbConfigManhlocal2 }]
+    { name: "server Local 1436", config: dbConfigManhlocal2 },
+    { name: "server Window A", config: dbConfigManhWindowServer2 }]
     for (const server of serverPrior2) {
         try {
             secondaryDBPool = new sql.ConnectionPool(server.config);
@@ -193,7 +229,8 @@ const GetManh2DBPool = async () => {
 const GetManh3DBPool = async () => {
     const serverPrior3 = [
         { name: "server 1435", config: dbConfigManh3 },
-        { name: "server Local 1435", config: dbConfigManhlocal3 }
+        { name: "server Local 1435", config: dbConfigManhlocal3 },
+        { name: "server Window B", config: dbConfigManhWindowServer3 }
     ]
     for (const server of serverPrior3) {
         try {

@@ -2,10 +2,10 @@ const sql = require("mssql");
 require("dotenv").config();
 sql.connect({
     user: "sa",
-    password: process.env.DB_Password,
-    server: process.env.DB_Server2,
-    port: 1436,
-    database: "test",
+    password: "@Strong123",
+    server: "192.168.195.207",
+
+    database: "DienLuc",
     options: {
         trustServerCertificate: true,
         // instanceName: "1436",  // hoặc port: 1433
