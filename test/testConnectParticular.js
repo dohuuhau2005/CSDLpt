@@ -2,8 +2,8 @@ const sql = require("mssql");
 require("dotenv").config();
 sql.connect({
     user: "sa",
-    password: "@Strong123",
-    server: "192.168.195.207",
+    password: "",
+    server: "",
 
     database: "DienLuc",
     options: {
