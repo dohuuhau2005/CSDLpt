@@ -1,105 +1,64 @@
-⚡ Electricity Service System - Distributed Database Architecture
-    Final project for the Distributed Database Systems course. This system simulates an electricity service management platform featuring a horizontal fragmentation architecture, integrated with an automatic Failover mechanism and an AI-powered (LLM) Log Replay tool for data recovery.
+# ⚡ Electricity Service System - Distributed Database Architecture
 
+[![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-v18-green.svg)](https://nodejs.org/)
+[![MSSQL](https://img.shields.io/badge/MSSQL-2022-red.svg)](https://www.microsoft.com/sql-server)
 
-------------------------------------------------------------------------------------------------------    
+Final project for the **Distributed Database Systems** course. [cite_start]This system simulates an electricity service management platform featuring a horizontal fragmentation architecture, integrated with an automatic Failover mechanism and an **AI-powered (LLM) Log Replay** tool for data recovery. [cite: 5-6, 60-61, 68]
 
-    📖 Table of Contents
-    - System Architecture
-    - Tech Stack
-    - Key Features
-    - Installation & DeploymentUsage Guide
-    - AI Recovery Tool
+---
 
+## 📖 Table of Contents
+- [System Architecture](#-system-architecture)
+- [Tech Stack](#-tech-stack)
+- [Key Features](#-key-features)
+- [Installation & Deployment](#-installation--deployment)
+- [Usage Guide](#-usage-guide)
+- [AI Recovery Tool](#-ai-recovery-tool-advanced-feature)
 
------------------------------------------------------------------------------------------------------
+---
 
+## 🏛 System Architecture
 
-    🏛 System ArchitectureThe system is deployed using a distributed model on Linux (via Docker Containers), consisting of:
-    - 3 Data Sites (TP1, TP2, TP3): Store horizontally fragmented data based on geographical regions.
-    - API Gateway (Node.js): Handles request routing and load balancing.
-    - Log DB (Loki): Centralized log storage for monitoring and disaster recovery.
-    ![Insert your architecture diagram here - e.g.,] (images/architecture_diagram.png)
-    
+The system is deployed using a distributed model on Linux (via Docker Containers), consisting of:
+* [cite_start]**3 Data Sites (TP1, TP2, TP3):** Store horizontally fragmented data based on geographical regions. [cite: 76]
+* [cite_start]**API Gateway (Node.js):** Handles request routing and load balancing. [cite: 63]
+* [cite_start]**Log DB (Loki):** Centralized log storage for monitoring and disaster recovery. [cite: 389]
 
-------------------------------------------------------------------------------------------------------  
-    
-    🛠 Tech Stack
-    | Component | Technology | Note |
-    | :--- | :--- | :--- |
-    | **Database** | Microsoft SQL Server 2022 | Running on Docker Containers |
-    | **Backend** | Node.js (Express) | API Gateway & Logic Processing |
-    | **Container** | Docker & Docker Compose | Infrastructure Management |
-    | **Monitoring** | Grafana & Loki | System Log Monitoring |
-    | **AI Module** | Ollama (Model Qwen 2.5) | Parses JSON Logs -> Generates SQL Scripts |
-    
+![Architecture Diagram](images/architecture_diagram.png)
 
-------------------------------------------------------------------------------------------------------    
-    
-    🚀 Key Features
-    1. Horizontal Fragmentation: Data is distributed across different servers based on branch/city location.
-    2. Custom Replication: A self-developed data synchronization mechanism optimized for flexibility in Linux environments.
-    3. Failover System: Automatically redirects traffic to a backup server when the primary server goes down.
-    4. AI Log Replay: Utilizes a Local AI model to parse JSON logs and reconstruct SQL commands to synchronize missing data during backup delays.
-    
-    
-------------------------------------------------------------------------------------------------------    
-     
-    ⚙ Installation & Deployment
-    1. Prerequisites
-        Docker Desktop
-        Node.js (v18 or higher)
-        Ollama (Required for the AI module)
-    2. Start Database & Monitoring
-        Use Docker Compose to set up the SQL Server infrastructure, Grafana, and Loki:
-        
-        ```docker-compose up -d```
+---
 
-        This command initializes 4 SQL Server containers (db1, db2, db3, db4) and the monitoring stack.
-        
-    3. Setup Backend
-        Navigate to the app directory and install dependencies:
-        
-        ```
-        npm install
-        node server.js
-        ```
-        The Node.js server will start on port 9999.
+## 🛠 Tech Stack
 
+| Component | Technology | Note |
+| :--- | :--- | :--- |
+| **Database** | Microsoft SQL Server 2022 | Running on Docker Containers |
+| **Backend** | Node.js (Express) | API Gateway & Logic Processing |
+| **Container** | Docker & Docker Compose | Infrastructure Management |
+| **Monitoring** | Grafana & Loki | System Log Monitoring |
+| **AI Module** | Ollama (Model Qwen 2.5) | Parses JSON Logs -> Generates SQL Scripts |
 
-------------------------------------------------------------------------------------------------------    
+---
 
-    🎮 Usage Guide
-    1. Access Monitoring DashboardOnce
-        Docker is running, access Grafana to view logs and system status:
-        Grafana URL: http://localhost:3300/Loki URL: http://localhost:3200/
-        Credentials:
-            Username: admin
-            Password: admin
+## 🚀 Key Features
 
-    2. Main APIs
-    Use Postman to test data flows:
-        POST /api/chinhanh: Add a new branch (automatically routed to DB TP1, TP2, or TP3).
-        (List other APIs here if applicable)
+1.  [cite_start]**Horizontal Fragmentation:** Data is distributed across different servers based on branch/city location. [cite: 60]
+2.  [cite_start]**Custom Replication:** A self-developed data synchronization mechanism optimized for flexibility in Linux environments. [cite: 61]
+3.  [cite_start]**Failover System:** Automatically redirects traffic to a backup server when the primary server goes down. [cite: 64]
+4.  [cite_start]**AI Log Replay:** Utilizes a Local AI model to parse JSON logs and reconstruct SQL commands to synchronize missing data during backup delays. [cite: 68, 74]
 
+---
 
-------------------------------------------------------------------------------------------------------               
-        
-    🤖 AI Recovery Tool (Advanced Feature)
-    In the event of a server failure where the latest backup is outdated, use the AI tool to replay logs:
-    Configuration: Ensure Ollama is running the qwen2.5-coder:7b model.
-    How to run the recovery script:
+## ⚙ Installation & Deployment
 
-    ```
-        # Syntax: node generateSQL.js [City] [Last Backup Date] [Last Backup Time]
-        node generateSQL.js TP1 2025-11-26 13:00:00
-    ```
+### 1. Prerequisites
+* Docker Desktop
+* Node.js (v18 or higher)
+* Ollama (Required for the AI module)
 
-    The script reads logs from D:/loki-logging/logs, filters transactions occurring after the backup time, and uses AI to convert them into an SQL script.
+### 2. Start Database & Monitoring
+Use Docker Compose to set up the SQL Server infrastructure, Grafana, and Loki:
 
-
------------------------------------------------------------------------------------------------------- 
-
-
-    👥 Authors
-        Do Huu Hau 
+```bash
+docker-compose up -d
